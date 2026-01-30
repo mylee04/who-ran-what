@@ -21,7 +21,7 @@ LIB_DIR="$(dirname "$SCRIPT_DIR")/lib/who-ran-what"
 # Load utility functions
 source "$LIB_DIR/utils/colors.sh"
 source "$LIB_DIR/utils/detect.sh"
-source "$LIB_DIR/core/parser.sh"
+source "$LIB_DIR/core/claude-parser.sh"
 source "$LIB_DIR/core/display.sh"
 
 # Detect how the script was called
@@ -97,7 +97,7 @@ main() {
             ;;
 
         "who-ran-what"|*)
-            case "${1:-help}" in
+            case "${1:-dashboard}" in
                 "help"|"-h"|"--help")
                     show_help
                     ;;

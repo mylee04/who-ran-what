@@ -8,6 +8,10 @@ draw_bar() {
     local max="$2"
     local width="${3:-20}"
 
+    if [[ "$max" -eq 0 ]]; then
+        max=1
+    fi
+
     local filled=$((value * width / max))
     local empty=$((width - filled))
 
@@ -27,46 +31,100 @@ show_dashboard_header() {
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 }
 
-# Display agent stats
+# Display agent stats (real data)
 show_agent_stats() {
     local period="${1:-week}"
 
     header "📊 Top Agents (This $period)"
 
-    # TODO: Replace with actual data
-    echo -e "  ├── Sisyphus      $(draw_bar 847 1000)  ${CYAN}847 calls${RESET}"
-    echo -e "  ├── Oracle        $(draw_bar 412 1000)  ${CYAN}412 calls${RESET}"
-    echo -e "  ├── Librarian     $(draw_bar 298 1000)  ${CYAN}298 calls${RESET}"
-    echo -e "  └── Explore       $(draw_bar 201 1000)  ${CYAN}201 calls${RESET}"
+    # Get real agent data
+    local agent_data=$(count_agents 2>/dev/null)
+
+    if [[ -z "$agent_data" ]]; then
+        echo -e "  ${DIM}No agent data found${RESET}"
+        return
+    fi
+
+    local max_count=$(echo "$agent_data" | head -1 | awk '{print $1}')
+
+    echo "$agent_data" | head -5 | while read -r count name; do
+        if [[ -n "$name" ]]; then
+            printf "  ├── %-12s $(draw_bar "$count" "$max_count")  ${CYAN}%d calls${RESET}\n" "$name" "$count"
+        fi
+    done
 }
 
-# Display skill stats
+# Display skill stats (real data)
 show_skill_stats() {
     local period="${1:-week}"
 
     header "🔧 Top Skills"
 
-    # TODO: Replace with actual data
-    echo -e "  ├── git-master    $(draw_bar 523 600)  ${CYAN}523 uses${RESET}"
-    echo -e "  ├── playwright    $(draw_bar 287 600)  ${CYAN}287 uses${RESET}"
-    echo -e "  └── web-search    $(draw_bar 178 600)  ${CYAN}178 uses${RESET}"
+    # Get real skill data
+    local skill_data=$(count_skills 2>/dev/null)
+
+    if [[ -z "$skill_data" ]]; then
+        echo -e "  ${DIM}No skill data found${RESET}"
+        return
+    fi
+
+    local max_count=$(echo "$skill_data" | head -1 | awk '{print $1}')
+
+    echo "$skill_data" | head -5 | while read -r count name; do
+        if [[ -n "$name" ]]; then
+            printf "  ├── %-12s $(draw_bar "$count" "$max_count")  ${CYAN}%d uses${RESET}\n" "$name" "$count"
+        fi
+    done
+}
+
+# Display tool stats (real data)
+show_tool_stats() {
+    local period="${1:-week}"
+
+    header "🛠️  Top Tools"
+
+    # Get real tool data
+    local tool_data=$(count_tools 2>/dev/null)
+
+    if [[ -z "$tool_data" ]]; then
+        echo -e "  ${DIM}No tool data found${RESET}"
+        return
+    fi
+
+    local max_count=$(echo "$tool_data" | head -1 | awk '{print $1}')
+
+    echo "$tool_data" | head -8 | while read -r count name; do
+        if [[ -n "$name" ]]; then
+            printf "  ├── %-12s $(draw_bar "$count" "$max_count")  ${CYAN}%d uses${RESET}\n" "$name" "$count"
+        fi
+    done
 }
 
 # Display unused items
 show_unused() {
     header "⚠️  Unused (30+ days)"
 
-    # TODO: Replace with actual data
-    echo -e "  └── ${DIM}deprecated-skill, old-mcp${RESET}     → ${YELLOW}Remove?${RESET}"
+    # TODO: Implement actual unused detection
+    echo -e "  ${DIM}Analysis not yet implemented${RESET}"
 }
 
 # Display project breakdown
 show_project_breakdown() {
-    header "📁 By Project"
+    header "📁 Projects with Claude Data"
 
-    # TODO: Replace with actual data
-    echo -e "  ├── ${CYAN}code-notify/${RESET}  - Sisyphus 90%, Oracle 10%"
-    echo -e "  └── ${CYAN}my-app/${RESET}       - Frontend 60%, Librarian 40%"
+    local projects=$(list_projects 2>/dev/null | head -5)
+
+    if [[ -z "$projects" ]]; then
+        echo -e "  ${DIM}No project data found${RESET}"
+        return
+    fi
+
+    echo "$projects" | while read -r line; do
+        local sessions=$(echo "$line" | cut -d' ' -f1)
+        local path=$(echo "$line" | cut -d' ' -f3-)
+        local name=$(basename "$path")
+        printf "  ├── ${CYAN}%-20s${RESET} %s sessions\n" "$name" "$sessions"
+    done
 }
 
 # Main dashboard display
@@ -79,7 +137,7 @@ show_dashboard() {
     echo ""
     show_skill_stats "$period"
     echo ""
-    show_unused
+    show_tool_stats "$period"
     echo ""
     show_project_breakdown
     echo ""

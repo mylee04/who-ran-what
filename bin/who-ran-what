@@ -1,0 +1,126 @@
+#!/bin/bash
+
+# who-ran-what - Track your AI agent and skill usage
+# https://github.com/mylee04/who-ran-what
+
+set -e
+
+# Version
+VERSION="0.1.0"
+
+# Determine the directory where the script is located (resolve symlinks)
+SCRIPT_PATH="${BASH_SOURCE[0]}"
+while [[ -L "$SCRIPT_PATH" ]]; do
+    SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
+    SCRIPT_PATH="$(readlink "$SCRIPT_PATH")"
+    [[ "$SCRIPT_PATH" != /* ]] && SCRIPT_PATH="$SCRIPT_DIR/$SCRIPT_PATH"
+done
+SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
+LIB_DIR="$(dirname "$SCRIPT_DIR")/lib/who-ran-what"
+
+# Load utility functions
+source "$LIB_DIR/utils/colors.sh"
+source "$LIB_DIR/utils/detect.sh"
+source "$LIB_DIR/core/parser.sh"
+source "$LIB_DIR/core/display.sh"
+
+# Detect how the script was called
+COMMAND_NAME=$(basename "$0")
+
+# Show version
+show_version() {
+    echo "who-ran-what version $VERSION"
+}
+
+# Show help
+show_help() {
+    cat << 'EOF'
+who-ran-what - Track your AI agent and skill usage
+
+USAGE:
+    who-ran-what <command>
+    wr <command>              # Short alias
+    wrp <command>             # Project command alias
+
+COMMANDS:
+    (default)       Show dashboard overview
+    today           Today's usage
+    week            This week's usage
+    month           This month's usage
+    agents          Agent breakdown
+    skills          Skill breakdown
+    projects        Project breakdown
+    clean           Show unused agents/skills
+    help            Show this help message
+    version         Show version information
+
+PROJECT COMMANDS:
+    project         Show current project stats (or: wrp)
+
+EXAMPLES:
+    wr              # Show dashboard
+    wr week         # Weekly breakdown
+    wr agents       # Agent usage stats
+    wrp             # Current project stats
+
+MORE INFO:
+    https://github.com/mylee04/who-ran-what
+EOF
+}
+
+# Main command router
+main() {
+    case "$COMMAND_NAME" in
+        "wr")
+            case "${1:-dashboard}" in
+                "help"|"-h"|"--help")
+                    show_help
+                    ;;
+                "version"|"-v"|"--version")
+                    show_version
+                    ;;
+                "today"|"week"|"month"|"agents"|"skills"|"projects"|"clean"|"dashboard")
+                    source "$LIB_DIR/commands/stats.sh"
+                    handle_stats_command "$@"
+                    ;;
+                *)
+                    error "Unknown command: $1"
+                    echo "Try 'wr help' for usage"
+                    exit 1
+                    ;;
+            esac
+            ;;
+
+        "wrp")
+            source "$LIB_DIR/commands/project.sh"
+            handle_project_command "$@"
+            ;;
+
+        "who-ran-what"|*)
+            case "${1:-help}" in
+                "help"|"-h"|"--help")
+                    show_help
+                    ;;
+                "version"|"-v"|"--version")
+                    show_version
+                    ;;
+                "today"|"week"|"month"|"agents"|"skills"|"projects"|"clean"|"dashboard")
+                    source "$LIB_DIR/commands/stats.sh"
+                    handle_stats_command "$@"
+                    ;;
+                "project")
+                    shift
+                    source "$LIB_DIR/commands/project.sh"
+                    handle_project_command "$@"
+                    ;;
+                *)
+                    error "Unknown command: $1"
+                    echo "Try 'who-ran-what help' for usage"
+                    exit 1
+                    ;;
+            esac
+            ;;
+    esac
+}
+
+main "$@"

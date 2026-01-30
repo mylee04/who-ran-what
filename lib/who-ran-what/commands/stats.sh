@@ -19,29 +19,29 @@ handle_stats_command() {
             show_dashboard "month"
             ;;
         "agents")
-            show_dashboard_header "all time"
+            show_dashboard_header "all"
             echo ""
-            show_agent_stats "all time"
+            show_agent_stats "all"
             echo ""
             ;;
         "skills")
-            show_dashboard_header "all time"
+            show_dashboard_header "all"
             echo ""
-            show_skill_stats "all time"
+            show_skill_stats "all"
             echo ""
             ;;
         "projects")
-            show_dashboard_header "all time"
+            show_dashboard_header "all"
             echo ""
-            show_project_breakdown
+            show_project_breakdown "all"
             echo ""
             ;;
         "clean")
-            show_dashboard_header "cleanup"
+            show_dashboard_header "month"
             echo ""
-            show_unused
+            show_unused "month"
             echo ""
-            info "Run 'wr clean --apply' to remove unused items"
+            dim "Unused agents/skills are not used in the past 30 days"
             ;;
         *)
             error "Unknown stats command: $command"

@@ -5,6 +5,53 @@
 
 CLAUDE_PROJECTS_DIR="$HOME/.claude/projects"
 
+# Get date for filtering (returns YYYY-MM-DD format)
+get_filter_date() {
+    local period="$1"
+    local os_type
+    os_type=$(uname -s)
+
+    case "$period" in
+        "today")
+            date +%Y-%m-%d
+            ;;
+        "week")
+            if [[ "$os_type" == "Darwin" ]]; then
+                date -v-7d +%Y-%m-%d
+            else
+                date -d "7 days ago" +%Y-%m-%d
+            fi
+            ;;
+        "month")
+            if [[ "$os_type" == "Darwin" ]]; then
+                date -v-30d +%Y-%m-%d
+            else
+                date -d "30 days ago" +%Y-%m-%d
+            fi
+            ;;
+        *)
+            # Return empty for "all" or invalid period
+            echo ""
+            ;;
+    esac
+}
+
+# Find session files with date filter
+find_session_files() {
+    local period="${1:-all}"
+    local filter_date
+
+    filter_date=$(get_filter_date "$period")
+
+    if [[ -z "$filter_date" ]]; then
+        # No date filter - return all files
+        find "$CLAUDE_PROJECTS_DIR" -name "*.jsonl" -print0 2>/dev/null
+    else
+        # Filter by modification time
+        find "$CLAUDE_PROJECTS_DIR" -name "*.jsonl" -newermt "$filter_date" -print0 2>/dev/null
+    fi
+}
+
 # Parse all Claude Code sessions and extract tool usage
 parse_claude_sessions() {
     local start_date="${1:-}"
@@ -87,16 +134,15 @@ parse_with_grep() {
 
 # Count agent (Task) usage by subagent_type
 count_agents() {
-    local start_date="${1:-}"
-    local end_date="${2:-}"
-    local project_filter="${3:-}"
+    local period="${1:-all}"
+    local project_filter="${2:-}"
 
     if [[ ! -d "$CLAUDE_PROJECTS_DIR" ]]; then
         return
     fi
 
     # Find Task tool calls and extract subagent_type
-    find "$CLAUDE_PROJECTS_DIR" -name "*.jsonl" -print0 2>/dev/null | \
+    find_session_files "$period" | \
     xargs -0 grep -h '"name":"Task"' 2>/dev/null | \
     grep -o '"subagent_type":"[^"]*"' | \
     cut -d'"' -f4 | \
@@ -105,16 +151,15 @@ count_agents() {
 
 # Count skill usage
 count_skills() {
-    local start_date="${1:-}"
-    local end_date="${2:-}"
-    local project_filter="${3:-}"
+    local period="${1:-all}"
+    local project_filter="${2:-}"
 
     if [[ ! -d "$CLAUDE_PROJECTS_DIR" ]]; then
         return
     fi
 
     # Find Skill tool calls and extract skill name
-    find "$CLAUDE_PROJECTS_DIR" -name "*.jsonl" -print0 2>/dev/null | \
+    find_session_files "$period" | \
     xargs -0 grep -h '"name":"Skill"' 2>/dev/null | \
     grep -o '"skill":"[^"]*"' | \
     cut -d'"' -f4 | \
@@ -123,16 +168,15 @@ count_skills() {
 
 # Count general tool usage
 count_tools() {
-    local start_date="${1:-}"
-    local end_date="${2:-}"
-    local project_filter="${3:-}"
+    local period="${1:-all}"
+    local project_filter="${2:-}"
 
     if [[ ! -d "$CLAUDE_PROJECTS_DIR" ]]; then
         return
     fi
 
     # Find all tool_use entries and extract tool names
-    find "$CLAUDE_PROJECTS_DIR" -name "*.jsonl" -print0 2>/dev/null | \
+    find_session_files "$period" | \
     xargs -0 grep -h '"type":"tool_use"' 2>/dev/null | \
     grep -o '"name":"[^"]*"' | \
     cut -d'"' -f4 | \
@@ -178,13 +222,101 @@ count_project_usage() {
 
 # Get all projects with Claude data
 list_projects() {
+    local period="${1:-all}"
+
     if [[ ! -d "$CLAUDE_PROJECTS_DIR" ]]; then
         return
     fi
 
     find "$CLAUDE_PROJECTS_DIR" -maxdepth 1 -type d -name "-*" | while read -r dir; do
-        local name=$(basename "$dir" | sed 's/^-//' | tr '-' '/')
-        local count=$(find "$dir" -name "*.jsonl" | wc -l | tr -d ' ')
-        echo "$count sessions: $name"
+        local name
+        local count
+        name=$(basename "$dir" | sed 's/^-//' | tr '-' '/')
+
+        if [[ "$period" == "all" ]]; then
+            count=$(find "$dir" -name "*.jsonl" 2>/dev/null | wc -l | tr -d ' ')
+        else
+            local filter_date
+            filter_date=$(get_filter_date "$period")
+            if [[ -n "$filter_date" ]]; then
+                count=$(find "$dir" -name "*.jsonl" -newermt "$filter_date" 2>/dev/null | wc -l | tr -d ' ')
+            else
+                count=$(find "$dir" -name "*.jsonl" 2>/dev/null | wc -l | tr -d ' ')
+            fi
+        fi
+
+        if [[ "$count" -gt 0 ]]; then
+            echo "$count sessions: $name"
+        fi
     done | sort -rn
+}
+
+# Find unused agents (not used in the specified period)
+find_unused_agents() {
+    local period="${1:-month}"
+
+    if [[ ! -d "$CLAUDE_PROJECTS_DIR" ]]; then
+        return
+    fi
+
+    # Get all available agent types from Claude's system
+    local all_agents="Explore Plan general-purpose code-reviewer test-engineer quality-engineer security-auditor backend-architect git-specialist full-stack-architect frontend-developer api-documenter devops-engineer database-optimizer cloud-architect deployment-engineer"
+
+    # Get recently used agents
+    local used_agents
+    used_agents=$(count_agents "$period" | awk '{print $2}' | tr '\n' ' ')
+
+    # Find agents that are available but not used
+    for agent in $all_agents; do
+        if [[ ! " $used_agents " =~ " $agent " ]]; then
+            echo "$agent"
+        fi
+    done
+}
+
+# Find unused skills (not used in the specified period)
+find_unused_skills() {
+    local period="${1:-month}"
+    local project_root="${2:-$(pwd)}"
+
+    if [[ ! -d "$CLAUDE_PROJECTS_DIR" ]]; then
+        return
+    fi
+
+    # Get configured skills from project's .claude/commands
+    local configured_skills=""
+    if [[ -d "$project_root/.claude/commands" ]]; then
+        configured_skills=$(find "$project_root/.claude/commands" -name "*.md" -exec basename {} .md \; 2>/dev/null | tr '\n' ' ')
+    fi
+
+    # Get recently used skills
+    local used_skills
+    used_skills=$(count_skills "$period" | awk '{print $2}' | tr '\n' ' ')
+
+    # Find skills that are configured but not used
+    for skill in $configured_skills; do
+        if [[ ! " $used_skills " =~ " $skill " ]]; then
+            echo "$skill"
+        fi
+    done
+}
+
+# Get usage summary with period comparison
+get_usage_summary() {
+    local period="${1:-week}"
+
+    echo "=== Usage Summary ($period) ==="
+    echo ""
+
+    local agent_count
+    local skill_count
+    local tool_count
+
+    agent_count=$(count_agents "$period" | wc -l | tr -d ' ')
+    skill_count=$(count_skills "$period" | wc -l | tr -d ' ')
+    tool_count=$(count_tools "$period" | wc -l | tr -d ' ')
+
+    echo "Unique agents used: $agent_count"
+    echo "Unique skills used: $skill_count"
+    echo "Unique tools used: $tool_count"
 }

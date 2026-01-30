@@ -31,21 +31,37 @@ show_dashboard_header() {
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 }
 
+# Format period for display
+format_period() {
+    local period="$1"
+    case "$period" in
+        "today") echo "Today" ;;
+        "week") echo "This Week" ;;
+        "month") echo "This Month" ;;
+        "all") echo "All Time" ;;
+        *) echo "$period" ;;
+    esac
+}
+
 # Display agent stats (real data)
 show_agent_stats() {
     local period="${1:-week}"
+    local display_period
+    display_period=$(format_period "$period")
 
-    header "📊 Top Agents (This $period)"
+    header "📊 Top Agents ($display_period)"
 
-    # Get real agent data
-    local agent_data=$(count_agents 2>/dev/null)
+    # Get real agent data with period filter
+    local agent_data
+    agent_data=$(count_agents "$period" 2>/dev/null)
 
     if [[ -z "$agent_data" ]]; then
         echo -e "  ${DIM}No agent data found${RESET}"
         return
     fi
 
-    local max_count=$(echo "$agent_data" | head -1 | awk '{print $1}')
+    local max_count
+    max_count=$(echo "$agent_data" | head -1 | awk '{print $1}')
 
     echo "$agent_data" | head -5 | while read -r count name; do
         if [[ -n "$name" ]]; then
@@ -60,15 +76,17 @@ show_skill_stats() {
 
     header "🔧 Top Skills"
 
-    # Get real skill data
-    local skill_data=$(count_skills 2>/dev/null)
+    # Get real skill data with period filter
+    local skill_data
+    skill_data=$(count_skills "$period" 2>/dev/null)
 
     if [[ -z "$skill_data" ]]; then
         echo -e "  ${DIM}No skill data found${RESET}"
         return
     fi
 
-    local max_count=$(echo "$skill_data" | head -1 | awk '{print $1}')
+    local max_count
+    max_count=$(echo "$skill_data" | head -1 | awk '{print $1}')
 
     echo "$skill_data" | head -5 | while read -r count name; do
         if [[ -n "$name" ]]; then
@@ -83,15 +101,17 @@ show_tool_stats() {
 
     header "🛠️  Top Tools"
 
-    # Get real tool data
-    local tool_data=$(count_tools 2>/dev/null)
+    # Get real tool data with period filter
+    local tool_data
+    tool_data=$(count_tools "$period" 2>/dev/null)
 
     if [[ -z "$tool_data" ]]; then
         echo -e "  ${DIM}No tool data found${RESET}"
         return
     fi
 
-    local max_count=$(echo "$tool_data" | head -1 | awk '{print $1}')
+    local max_count
+    max_count=$(echo "$tool_data" | head -1 | awk '{print $1}')
 
     echo "$tool_data" | head -8 | while read -r count name; do
         if [[ -n "$name" ]]; then
@@ -102,17 +122,52 @@ show_tool_stats() {
 
 # Display unused items
 show_unused() {
-    header "⚠️  Unused (30+ days)"
+    local period="${1:-month}"
+    local display_period
+    display_period=$(format_period "$period")
 
-    # TODO: Implement actual unused detection
-    echo -e "  ${DIM}Analysis not yet implemented${RESET}"
+    header "⚠️  Unused ($display_period)"
+
+    # Get unused agents
+    local unused_agents
+    unused_agents=$(find_unused_agents "$period" 2>/dev/null)
+
+    if [[ -n "$unused_agents" ]]; then
+        echo -e "  ${YELLOW}Unused Agents:${RESET}"
+        echo "$unused_agents" | head -5 | while read -r agent; do
+            if [[ -n "$agent" ]]; then
+                echo -e "    └── ${DIM}$agent${RESET}"
+            fi
+        done
+    fi
+
+    # Get unused skills
+    local unused_skills
+    unused_skills=$(find_unused_skills "$period" 2>/dev/null)
+
+    if [[ -n "$unused_skills" ]]; then
+        echo ""
+        echo -e "  ${YELLOW}Unused Skills:${RESET}"
+        echo "$unused_skills" | head -5 | while read -r skill; do
+            if [[ -n "$skill" ]]; then
+                echo -e "    └── ${DIM}$skill${RESET}"
+            fi
+        done
+    fi
+
+    if [[ -z "$unused_agents" ]] && [[ -z "$unused_skills" ]]; then
+        echo -e "  ${GREEN}All agents and skills are being used!${RESET}"
+    fi
 }
 
 # Display project breakdown
 show_project_breakdown() {
+    local period="${1:-week}"
+
     header "📁 Projects with Claude Data"
 
-    local projects=$(list_projects 2>/dev/null | head -5)
+    local projects
+    projects=$(list_projects "$period" 2>/dev/null | head -5)
 
     if [[ -z "$projects" ]]; then
         echo -e "  ${DIM}No project data found${RESET}"
@@ -120,9 +175,12 @@ show_project_breakdown() {
     fi
 
     echo "$projects" | while read -r line; do
-        local sessions=$(echo "$line" | cut -d' ' -f1)
-        local path=$(echo "$line" | cut -d' ' -f3-)
-        local name=$(basename "$path")
+        local sessions
+        local path
+        local name
+        sessions=$(echo "$line" | cut -d' ' -f1)
+        path=$(echo "$line" | cut -d' ' -f3-)
+        name=$(basename "$path")
         printf "  ├── ${CYAN}%-20s${RESET} %s sessions\n" "$name" "$sessions"
     done
 }
@@ -139,6 +197,6 @@ show_dashboard() {
     echo ""
     show_tool_stats "$period"
     echo ""
-    show_project_breakdown
+    show_project_breakdown "$period"
     echo ""
 }

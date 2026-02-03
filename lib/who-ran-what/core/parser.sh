@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Data parsing for who-ran-what
+# shellcheck disable=SC2034  # Parameters reserved for future implementation
 
 # Parse Claude Code session logs for agent/skill usage
 parse_claude_sessions() {

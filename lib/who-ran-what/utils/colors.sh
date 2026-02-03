@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Color definitions for who-ran-what
+# shellcheck disable=SC2034  # Colors are defined for use by sourcing scripts
 
 # Colors
 RED='\033[0;31m'

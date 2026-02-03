@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Run shellcheck on bin
+        run: shellcheck bin/who-ran-what
+
+      - name: Run shellcheck on lib
+        run: shellcheck lib/who-ran-what/**/*.sh
+
+      - name: Run shellcheck on tests
+        run: shellcheck tests/*.sh
+
+  test:
+    name: Tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install jq
+        run: |
+          if [[ "$RUNNER_OS" == "Linux" ]]; then
+            sudo apt-get install -y jq
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            brew install jq
+          fi
+        shell: bash
+
+      - name: Create mock Claude data directory
+        run: |
+          mkdir -p ~/.claude/projects/-test-project/sessions
+          echo '{"message":{"role":"assistant","content":[{"type":"tool_use","name":"Bash"}]}}' > ~/.claude/projects/-test-project/sessions/test.jsonl
+        shell: bash
+
+      - name: Run tests
+        run: bash tests/run_all.sh
+        shell: bash
+
+  test-windows:
+    name: Tests (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install jq
+        run: choco install jq -y
+        shell: powershell
+
+      - name: Create mock Claude data directory
+        run: |
+          mkdir -p ~/.claude/projects/-test-project/sessions
+          echo '{"message":{"role":"assistant","content":[{"type":"tool_use","name":"Bash"}]}}' > ~/.claude/projects/-test-project/sessions/test.jsonl
+        shell: bash
+
+      - name: Run tests
+        run: bash tests/run_all.sh
+        shell: bash

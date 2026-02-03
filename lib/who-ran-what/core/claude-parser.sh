@@ -63,12 +63,12 @@ parse_claude_sessions() {
         return
     fi
 
-    local results="[]"
-
     # Find all JSONL session files
     while IFS= read -r -d '' session_file; do
-        local project_path=$(dirname "$session_file")
-        local project_name=$(basename "$project_path" | sed 's/^-//' | tr '-' '/')
+        local project_path
+        local project_name
+        project_path=$(dirname "$session_file")
+        project_name=$(basename "$project_path" | sed 's/^-//' | tr '-' '/')
 
         # Skip if project filter doesn't match
         if [[ -n "$project_filter" ]] && [[ "$project_name" != *"$project_filter"* ]]; then
@@ -127,7 +127,8 @@ parse_with_grep() {
 
     # Extract tool_use entries
     grep -o '"type":"tool_use"[^}]*}' "$file" 2>/dev/null | while read -r line; do
-        local tool=$(echo "$line" | grep -o '"name":"[^"]*"' | cut -d'"' -f4)
+        local tool
+        tool=$(echo "$line" | grep -o '"name":"[^"]*"' | cut -d'"' -f4)
         echo "$project|$tool"
     done
 }
@@ -192,7 +193,8 @@ count_project_usage() {
     fi
 
     # Convert project path to Claude's format
-    local claude_project_dir=$(echo "$project_path" | sed 's|/|-|g; s|^-||')
+    local claude_project_dir
+    claude_project_dir=$(echo "$project_path" | sed 's|/|-|g; s|^-||')
     local full_path="$CLAUDE_PROJECTS_DIR/-$claude_project_dir"
 
     if [[ ! -d "$full_path" ]]; then
@@ -268,7 +270,7 @@ find_unused_agents() {
 
     # Find agents that are available but not used
     for agent in $all_agents; do
-        if [[ ! " $used_agents " =~ " $agent " ]]; then
+        if [[ ! " $used_agents " =~ [[:space:]]${agent}[[:space:]] ]]; then
             echo "$agent"
         fi
     done
@@ -295,7 +297,7 @@ find_unused_skills() {
 
     # Find skills that are configured but not used
     for skill in $configured_skills; do
-        if [[ ! " $used_skills " =~ " $skill " ]]; then
+        if [[ ! " $used_skills " =~ [[:space:]]${skill}[[:space:]] ]]; then
             echo "$skill"
         fi
     done

@@ -4,7 +4,7 @@
 
 Analytics dashboard for AI coding tools - track agent invocations, skill usage, and optimize your workflow.
 
-[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/mylee04/who-ran-what/releases)
+[![Version](https://img.shields.io/badge/version-0.1.1-blue.svg)](https://github.com/mylee04/who-ran-what/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)]()
 
@@ -89,17 +89,17 @@ wrp             # Current project stats
 
 ## Usage
 
-| Command | Description |
-|---------|-------------|
-| `wr` | Dashboard overview (default: weekly view) |
-| `wr today` | Today's usage stats |
-| `wr week` | This week's breakdown |
-| `wr month` | This month's breakdown |
-| `wr agents` | All-time agent statistics |
-| `wr skills` | All-time skill statistics |
-| `wr projects` | Project breakdown |
-| `wr clean` | Show unused agents/skills (30+ days) |
-| `wrp` | Current project stats |
+| Command       | Description                               |
+| ------------- | ----------------------------------------- |
+| `wr`          | Dashboard overview (default: weekly view) |
+| `wr today`    | Today's usage stats                       |
+| `wr week`     | This week's breakdown                     |
+| `wr month`    | This month's breakdown                    |
+| `wr agents`   | All-time agent statistics                 |
+| `wr skills`   | All-time skill statistics                 |
+| `wr projects` | Project breakdown                         |
+| `wr clean`    | Show unused agents/skills (30+ days)      |
+| `wrp`         | Current project stats                     |
 
 ## Requirements
 
@@ -109,12 +109,12 @@ wrp             # Current project stats
 
 ## Data Sources
 
-| Tool | Data Location | Status |
-|------|---------------|--------|
-| Claude Code | `~/.claude/projects/` | Fully supported |
-| OpenCode | `~/.local/share/opencode/` | Coming soon |
-| Codex CLI | `~/.codex/sessions/` | Coming soon |
-| Gemini CLI | `~/.gemini/` | Coming soon |
+| Tool        | Data Location              | Status          |
+| ----------- | -------------------------- | --------------- |
+| Claude Code | `~/.claude/projects/`      | Fully supported |
+| OpenCode    | `~/.local/share/opencode/` | Coming soon     |
+| Codex CLI   | `~/.codex/sessions/`       | Coming soon     |
+| Gemini CLI  | `~/.gemini/`               | Coming soon     |
 
 ## Troubleshooting
 

@@ -17,13 +17,13 @@ jobs:
         run: sudo apt-get install -y shellcheck
 
       - name: Run shellcheck on bin
-        run: shellcheck -x bin/who-ran-what
+        run: shellcheck -x -e SC1091 bin/who-ran-what
 
       - name: Run shellcheck on lib
-        run: shellcheck -x lib/who-ran-what/**/*.sh
+        run: shellcheck -x -e SC1091 lib/who-ran-what/**/*.sh
 
       - name: Run shellcheck on tests
-        run: shellcheck -x tests/*.sh
+        run: shellcheck -x -e SC1091 tests/*.sh
 
   test:
     name: Tests

@@ -1,0 +1,62 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Create tarball
+        run: |
+          mkdir -p dist
+          tar -czvf dist/who-ran-what-${{ steps.version.outputs.VERSION }}.tar.gz \
+            --exclude='.git' \
+            --exclude='dist' \
+            --exclude='.github' \
+            bin/ lib/ tests/ README.md LICENSE
+
+      - name: Calculate SHA256
+        id: sha
+        run: |
+          SHA=$(shasum -a 256 dist/who-ran-what-${{ steps.version.outputs.VERSION }}.tar.gz | cut -d ' ' -f 1)
+          echo "SHA256=$SHA" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/who-ran-what-${{ steps.version.outputs.VERSION }}.tar.gz
+          body: |
+            ## who-ran-what v${{ steps.version.outputs.VERSION }}
+
+            ### Installation
+
+            **Homebrew:**
+            ```bash
+            brew tap mylee04/tools
+            brew install who-ran-what
+            ```
+
+            **Manual:**
+            ```bash
+            curl -L https://github.com/mylee04/who-ran-what/releases/download/v${{ steps.version.outputs.VERSION }}/who-ran-what-${{ steps.version.outputs.VERSION }}.tar.gz | tar xz
+            ```
+
+            ### SHA256
+            ```
+            ${{ steps.sha.outputs.SHA256 }}
+            ```
+          draft: false
+          prerelease: false

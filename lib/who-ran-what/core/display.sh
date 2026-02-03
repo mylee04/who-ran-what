@@ -57,6 +57,7 @@ show_agent_stats() {
 
     if [[ -z "$agent_data" ]]; then
         echo -e "  ${DIM}No agent data found${RESET}"
+        echo -e "  ${DIM}Agents are created when you use the Task tool${RESET}"
         return
     fi
 
@@ -185,6 +186,49 @@ show_project_breakdown() {
     done
 }
 
+# Display trend indicator
+show_trend_indicator() {
+    local change="$1"
+
+    if [[ "$change" -gt 0 ]]; then
+        echo -e "${GREEN}↑ +${change}%${RESET}"
+    elif [[ "$change" -lt 0 ]]; then
+        echo -e "${RED}↓ ${change}%${RESET}"
+    else
+        echo -e "${DIM}→ 0%${RESET}"
+    fi
+}
+
+# Display trend summary
+show_trend_summary() {
+    local period="${1:-week}"
+
+    # Only show trends for week or month
+    if [[ "$period" != "week" ]] && [[ "$period" != "month" ]]; then
+        return
+    fi
+
+    local trend_data
+    trend_data=$(get_trend_data "$period")
+
+    local current
+    local previous
+    local change
+    current=$(echo "$trend_data" | cut -d'|' -f1)
+    previous=$(echo "$trend_data" | cut -d'|' -f2)
+    change=$(echo "$trend_data" | cut -d'|' -f3)
+
+    local prev_label
+    if [[ "$period" == "week" ]]; then
+        prev_label="vs last week"
+    else
+        prev_label="vs last month"
+    fi
+
+    header "📈 Trend"
+    printf "  Tool calls: ${BOLD}%s${RESET} %s (%s: %s)\n" "$current" "$(show_trend_indicator "$change")" "$prev_label" "$previous"
+}
+
 # Main dashboard display
 show_dashboard() {
     local period="${1:-week}"
@@ -198,5 +242,7 @@ show_dashboard() {
     show_tool_stats "$period"
     echo ""
     show_project_breakdown "$period"
+    echo ""
+    show_trend_summary "$period"
     echo ""
 }

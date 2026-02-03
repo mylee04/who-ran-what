@@ -29,11 +29,97 @@ get_filter_date() {
                 date -d "30 days ago" +%Y-%m-%d
             fi
             ;;
+        "last_week")
+            if [[ "$os_type" == "Darwin" ]]; then
+                date -v-14d +%Y-%m-%d
+            else
+                date -d "14 days ago" +%Y-%m-%d
+            fi
+            ;;
+        "last_month")
+            if [[ "$os_type" == "Darwin" ]]; then
+                date -v-60d +%Y-%m-%d
+            else
+                date -d "60 days ago" +%Y-%m-%d
+            fi
+            ;;
         *)
             # Return empty for "all" or invalid period
             echo ""
             ;;
     esac
+}
+
+# Get end date for period range filtering
+get_filter_end_date() {
+    local period="$1"
+    local os_type
+    os_type=$(uname -s)
+
+    case "$period" in
+        "last_week")
+            if [[ "$os_type" == "Darwin" ]]; then
+                date -v-7d +%Y-%m-%d
+            else
+                date -d "7 days ago" +%Y-%m-%d
+            fi
+            ;;
+        "last_month")
+            if [[ "$os_type" == "Darwin" ]]; then
+                date -v-30d +%Y-%m-%d
+            else
+                date -d "30 days ago" +%Y-%m-%d
+            fi
+            ;;
+        *)
+            echo ""
+            ;;
+    esac
+}
+
+# Count total calls for a period (for trend comparison)
+count_total_calls() {
+    local period="${1:-week}"
+
+    if [[ ! -d "$CLAUDE_PROJECTS_DIR" ]]; then
+        echo "0"
+        return
+    fi
+
+    local count
+    count=$(find_session_files "$period" | xargs -0 grep -h '"type":"tool_use"' 2>/dev/null | wc -l | tr -d ' ')
+    echo "$count"
+}
+
+# Get trend data comparing current vs previous period
+get_trend_data() {
+    local period="${1:-week}"
+    local current_count
+    local previous_count
+    local previous_period
+
+    case "$period" in
+        "week")
+            previous_period="last_week"
+            ;;
+        "month")
+            previous_period="last_month"
+            ;;
+        *)
+            echo "0|0|0"
+            return
+            ;;
+    esac
+
+    current_count=$(count_total_calls "$period")
+    previous_count=$(count_total_calls "$previous_period")
+
+    local change=0
+    if [[ "$previous_count" -gt 0 ]]; then
+        change=$(( (current_count - previous_count) * 100 / previous_count ))
+    fi
+
+    echo "$current_count|$previous_count|$change"
 }
 
 # Find session files with date filter
@@ -143,8 +229,9 @@ count_agents() {
     fi
 
     # Find Task tool calls and extract subagent_type
+    # Use xargs -P for parallel processing on large datasets
     find_session_files "$period" | \
-    xargs -0 grep -h '"name":"Task"' 2>/dev/null | \
+    xargs -0 -P 4 grep -h '"name":"Task"' 2>/dev/null | \
     grep -o '"subagent_type":"[^"]*"' | \
     cut -d'"' -f4 | \
     sort | uniq -c | sort -rn
@@ -160,8 +247,9 @@ count_skills() {
     fi
 
     # Find Skill tool calls and extract skill name
+    # Use xargs -P for parallel processing
     find_session_files "$period" | \
-    xargs -0 grep -h '"name":"Skill"' 2>/dev/null | \
+    xargs -0 -P 4 grep -h '"name":"Skill"' 2>/dev/null | \
     grep -o '"skill":"[^"]*"' | \
     cut -d'"' -f4 | \
     sort | uniq -c | sort -rn
@@ -177,8 +265,9 @@ count_tools() {
     fi
 
     # Find all tool_use entries and extract tool names
+    # Use xargs -P for parallel processing
     find_session_files "$period" | \
-    xargs -0 grep -h '"type":"tool_use"' 2>/dev/null | \
+    xargs -0 -P 4 grep -h '"type":"tool_use"' 2>/dev/null | \
     grep -o '"name":"[^"]*"' | \
     cut -d'"' -f4 | \
     sort | uniq -c | sort -rn

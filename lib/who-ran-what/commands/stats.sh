@@ -7,41 +7,73 @@ handle_stats_command() {
 
     case "$command" in
         "dashboard")
-            show_dashboard "week"
+            if [[ "$JSON_OUTPUT" == "true" ]]; then
+                generate_dashboard_json "$CONFIG_DEFAULT_PERIOD"
+            else
+                show_dashboard "$CONFIG_DEFAULT_PERIOD"
+            fi
             ;;
         "today")
-            show_dashboard "today"
+            if [[ "$JSON_OUTPUT" == "true" ]]; then
+                generate_dashboard_json "today"
+            else
+                show_dashboard "today"
+            fi
             ;;
         "week")
-            show_dashboard "week"
+            if [[ "$JSON_OUTPUT" == "true" ]]; then
+                generate_dashboard_json "week"
+            else
+                show_dashboard "week"
+            fi
             ;;
         "month")
-            show_dashboard "month"
+            if [[ "$JSON_OUTPUT" == "true" ]]; then
+                generate_dashboard_json "month"
+            else
+                show_dashboard "month"
+            fi
             ;;
         "agents")
-            show_dashboard_header "all"
-            echo ""
-            show_agent_stats "all"
-            echo ""
+            if [[ "$JSON_OUTPUT" == "true" ]]; then
+                generate_agents_json "all"
+            else
+                show_dashboard_header "all"
+                echo ""
+                show_agent_stats "all"
+                echo ""
+            fi
             ;;
         "skills")
-            show_dashboard_header "all"
-            echo ""
-            show_skill_stats "all"
-            echo ""
+            if [[ "$JSON_OUTPUT" == "true" ]]; then
+                generate_skills_json "all"
+            else
+                show_dashboard_header "all"
+                echo ""
+                show_skill_stats "all"
+                echo ""
+            fi
             ;;
         "projects")
-            show_dashboard_header "all"
-            echo ""
-            show_project_breakdown "all"
-            echo ""
+            if [[ "$JSON_OUTPUT" == "true" ]]; then
+                generate_projects_json "all"
+            else
+                show_dashboard_header "all"
+                echo ""
+                show_project_breakdown "all"
+                echo ""
+            fi
             ;;
         "clean")
-            show_dashboard_header "month"
-            echo ""
-            show_unused "month"
-            echo ""
-            dim "Unused agents/skills are not used in the past 30 days"
+            if [[ "$JSON_OUTPUT" == "true" ]]; then
+                generate_unused_json "month"
+            else
+                show_dashboard_header "month"
+                echo ""
+                show_unused "month"
+                echo ""
+                dim "Unused agents/skills are not used in the past 30 days"
+            fi
             ;;
         *)
             error "Unknown stats command: $command"

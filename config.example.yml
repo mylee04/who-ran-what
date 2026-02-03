@@ -1,0 +1,22 @@
+# who-ran-what configuration
+# Copy this file to ~/.who-ran-what.yml
+
+# Default time period for dashboard
+# Options: today, week, month
+default_period: week
+
+# Show trend comparison (vs previous period)
+show_trend: true
+
+# Maximum items to show in each category
+max_items: 5
+
+# Agents to exclude from unused detection
+# ignored_agents:
+#   - deprecated-agent
+#   - test-agent
+
+# Skills to exclude from unused detection
+# ignored_skills:
+#   - old-skill
+#   - test-skill

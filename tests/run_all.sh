@@ -9,7 +9,6 @@ echo "  Running All Tests for who-ran-what"
 echo "============================================"
 echo ""
 
-TOTAL_PASSED=0
 TOTAL_FAILED=0
 
 for test_file in "$SCRIPT_DIR"/test_*.sh; do

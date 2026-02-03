@@ -5,33 +5,45 @@ description: Create a well-formatted commit
 # Commit Changes
 
 ## What This Command Does
-1. Checks for uncommitted changes
-2. Runs tests to verify code works
-3. Generates appropriate commit message
+
+1. **MUST** run shellcheck before committing (MANDATORY)
+2. **MUST** run tests before committing (MANDATORY)
+3. Reviews changes and generates commit message
 4. Creates the commit
 
-## When to Use
-- After completing a feature or fix
-- When changes are ready to be saved
+## MANDATORY Pre-Commit Checks
 
-## Process
+**DO NOT COMMIT if any of these fail!**
 
-### 1. Pre-Commit Checks
+### 1. Shellcheck (REQUIRED)
+
 ```bash
-# Run tests
-make test
-
-# Check for lint issues
-shellcheck bin/who-ran-what lib/who-ran-what/**/*.sh
+# Run shellcheck with -x flag to follow source files
+shellcheck -x bin/who-ran-what
+shellcheck -x lib/who-ran-what/**/*.sh
+shellcheck -x tests/*.sh
 ```
 
-### 2. Review Changes
+**If shellcheck fails → FIX THE ISSUES FIRST, then retry commit.**
+
+### 2. Tests (REQUIRED)
+
+```bash
+bash tests/run_all.sh
+```
+
+**If tests fail → FIX THE ISSUES FIRST, then retry commit.**
+
+## Process (After Checks Pass)
+
+### 1. Review Changes
+
 ```bash
 git status
 git diff --stat
 ```
 
-### 3. Commit Message Format
+### 2. Commit Message Format
 
 ```
 type: brief description
@@ -41,16 +53,17 @@ type: brief description
 ```
 
 #### Types
-| Type | Use For |
-|------|---------|
-| feat | New feature |
-| fix | Bug fix |
-| docs | Documentation |
-| refactor | Code refactoring |
-| test | Adding tests |
-| chore | Maintenance |
 
-### 4. Example Messages
+| Type     | Use For          |
+| -------- | ---------------- |
+| feat     | New feature      |
+| fix      | Bug fix          |
+| docs     | Documentation    |
+| refactor | Code refactoring |
+| test     | Adding tests     |
+| chore    | Maintenance      |
+
+### 3. Example Messages
 
 ```
 feat: add Gemini CLI parser
@@ -65,11 +78,20 @@ fix: handle missing session files gracefully
 
 - Check file existence before parsing
 - Log warning instead of error
-- Continue processing other files
 ```
 
 ## Rules
+
+- **NEVER commit without running shellcheck first**
+- **NEVER commit without running tests first**
 - No Co-Authored-By lines
 - No .env files
-- Run tests before committing
 - Keep messages concise but descriptive
+
+## Quick Pre-Commit Command
+
+Run this before every commit:
+
+```bash
+shellcheck -x bin/who-ran-what lib/who-ran-what/**/*.sh tests/*.sh && bash tests/run_all.sh && echo "✅ Ready to commit!"
+```

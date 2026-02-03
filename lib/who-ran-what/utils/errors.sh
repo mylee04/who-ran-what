@@ -81,12 +81,13 @@ check_jq_available() {
 }
 
 # Safe wrapper for commands that might fail
+# Usage: safe_run "fallback_value" command arg1 arg2 ...
 safe_run() {
-    local cmd="$1"
-    local fallback="${2:-}"
+    local fallback="${1:-}"
+    shift
 
     local result
-    if result=$(eval "$cmd" 2>/dev/null); then
+    if result=$("$@" 2>/dev/null); then
         echo "$result"
     elif [[ -n "$fallback" ]]; then
         echo "$fallback"

@@ -6,6 +6,18 @@
 # Global flag for JSON output
 JSON_OUTPUT="${JSON_OUTPUT:-false}"
 
+# Escape special characters for JSON string
+json_escape() {
+    local str="$1"
+    # Escape backslashes first, then quotes, then control characters
+    str="${str//\\/\\\\}"
+    str="${str//\"/\\\"}"
+    str="${str//$'\n'/\\n}"
+    str="${str//$'\r'/\\r}"
+    str="${str//$'\t'/\\t}"
+    echo "$str"
+}
+
 # Output JSON array from count data (format: "count name")
 count_to_json_array() {
     local data="$1"
@@ -22,12 +34,14 @@ count_to_json_array() {
 
     while read -r count name; do
         if [[ -n "$name" ]]; then
+            local escaped_name
+            escaped_name=$(json_escape "$name")
             if [[ "$first" == "true" ]]; then
                 first=false
             else
                 echo -n ","
             fi
-            echo -n "{\"$key_name\":\"$name\",\"$value_name\":$count}"
+            echo -n "{\"$key_name\":\"$escaped_name\",\"$value_name\":$count}"
         fi
     done <<< "$data"
 
@@ -48,12 +62,14 @@ list_to_json_array() {
 
     while read -r item; do
         if [[ -n "$item" ]]; then
+            local escaped_item
+            escaped_item=$(json_escape "$item")
             if [[ "$first" == "true" ]]; then
                 first=false
             else
                 echo -n ","
             fi
-            echo -n "\"$item\""
+            echo -n "\"$escaped_item\""
         fi
     done <<< "$data"
 
@@ -81,12 +97,15 @@ projects_to_json_array() {
         name=$(basename "$path")
 
         if [[ -n "$name" ]]; then
+            local escaped_name escaped_path
+            escaped_name=$(json_escape "$name")
+            escaped_path=$(json_escape "$path")
             if [[ "$first" == "true" ]]; then
                 first=false
             else
                 echo -n ","
             fi
-            echo -n "{\"name\":\"$name\",\"path\":\"$path\",\"sessions\":$sessions}"
+            echo -n "{\"name\":\"$escaped_name\",\"path\":\"$escaped_path\",\"sessions\":$sessions}"
         fi
     done <<< "$data"
 

@@ -8,72 +8,25 @@ CLAUDE_PROJECTS_DIR="$HOME/.claude/projects"
 # Get date for filtering (returns YYYY-MM-DD format)
 get_filter_date() {
     local period="$1"
-    local os_type
-    os_type=$(uname -s)
 
     case "$period" in
-        "today")
-            date +%Y-%m-%d
-            ;;
-        "week")
-            if [[ "$os_type" == "Darwin" ]]; then
-                date -v-7d +%Y-%m-%d
-            else
-                date -d "7 days ago" +%Y-%m-%d
-            fi
-            ;;
-        "month")
-            if [[ "$os_type" == "Darwin" ]]; then
-                date -v-30d +%Y-%m-%d
-            else
-                date -d "30 days ago" +%Y-%m-%d
-            fi
-            ;;
-        "last_week")
-            if [[ "$os_type" == "Darwin" ]]; then
-                date -v-14d +%Y-%m-%d
-            else
-                date -d "14 days ago" +%Y-%m-%d
-            fi
-            ;;
-        "last_month")
-            if [[ "$os_type" == "Darwin" ]]; then
-                date -v-60d +%Y-%m-%d
-            else
-                date -d "60 days ago" +%Y-%m-%d
-            fi
-            ;;
-        *)
-            # Return empty for "all" or invalid period
-            echo ""
-            ;;
+        "today")      date +%Y-%m-%d ;;
+        "week")       calculate_date_offset 7 ;;
+        "month")      calculate_date_offset 30 ;;
+        "last_week")  calculate_date_offset 14 ;;
+        "last_month") calculate_date_offset 60 ;;
+        *)            echo "" ;;  # Return empty for "all" or invalid period
     esac
 }
 
 # Get end date for period range filtering
 get_filter_end_date() {
     local period="$1"
-    local os_type
-    os_type=$(uname -s)
 
     case "$period" in
-        "last_week")
-            if [[ "$os_type" == "Darwin" ]]; then
-                date -v-7d +%Y-%m-%d
-            else
-                date -d "7 days ago" +%Y-%m-%d
-            fi
-            ;;
-        "last_month")
-            if [[ "$os_type" == "Darwin" ]]; then
-                date -v-30d +%Y-%m-%d
-            else
-                date -d "30 days ago" +%Y-%m-%d
-            fi
-            ;;
-        *)
-            echo ""
-            ;;
+        "last_week")  calculate_date_offset 7 ;;
+        "last_month") calculate_date_offset 30 ;;
+        *)            echo "" ;;
     esac
 }
 

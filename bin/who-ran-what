@@ -32,7 +32,10 @@ COMMAND_NAME=$(basename "$0")
 
 # Parse global flags
 JSON_OUTPUT="false"
+declare -a REMAINING_ARGS
+
 parse_global_flags() {
+    REMAINING_ARGS=()
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --json|-j)
@@ -46,7 +49,6 @@ parse_global_flags() {
         esac
     done
 }
-declare -a REMAINING_ARGS
 
 # Show version
 show_version() {
@@ -95,67 +97,49 @@ MORE INFO:
 EOF
 }
 
+# Handle common commands (shared between wr and who-ran-what)
+handle_command() {
+    local cmd="${1:-dashboard}"
+
+    case "$cmd" in
+        "help"|"-h"|"--help")
+            show_help
+            ;;
+        "version"|"-v"|"--version")
+            show_version
+            ;;
+        "today"|"week"|"month"|"agents"|"skills"|"projects"|"clean"|"dashboard")
+            source "$LIB_DIR/commands/stats.sh"
+            handle_stats_command "$@"
+            ;;
+        "project")
+            shift
+            source "$LIB_DIR/commands/project.sh"
+            handle_project_command "$@"
+            ;;
+        "config")
+            show_config
+            ;;
+        *)
+            error "Unknown command: $cmd"
+            echo "Try '$COMMAND_NAME help' for usage"
+            exit 1
+            ;;
+    esac
+}
+
 # Main command router
 main() {
-    # Parse global flags first
     parse_global_flags "$@"
     set -- "${REMAINING_ARGS[@]}"
 
     case "$COMMAND_NAME" in
-        "wr")
-            case "${1:-dashboard}" in
-                "help"|"-h"|"--help")
-                    show_help
-                    ;;
-                "version"|"-v"|"--version")
-                    show_version
-                    ;;
-                "today"|"week"|"month"|"agents"|"skills"|"projects"|"clean"|"dashboard")
-                    source "$LIB_DIR/commands/stats.sh"
-                    handle_stats_command "$@"
-                    ;;
-                "config")
-                    show_config
-                    ;;
-                *)
-                    error "Unknown command: $1"
-                    echo "Try 'wr help' for usage"
-                    exit 1
-                    ;;
-            esac
-            ;;
-
         "wrp")
             source "$LIB_DIR/commands/project.sh"
             handle_project_command "$@"
             ;;
-
-        "who-ran-what"|*)
-            case "${1:-dashboard}" in
-                "help"|"-h"|"--help")
-                    show_help
-                    ;;
-                "version"|"-v"|"--version")
-                    show_version
-                    ;;
-                "today"|"week"|"month"|"agents"|"skills"|"projects"|"clean"|"dashboard")
-                    source "$LIB_DIR/commands/stats.sh"
-                    handle_stats_command "$@"
-                    ;;
-                "project")
-                    shift
-                    source "$LIB_DIR/commands/project.sh"
-                    handle_project_command "$@"
-                    ;;
-                "config")
-                    show_config
-                    ;;
-                *)
-                    error "Unknown command: $1"
-                    echo "Try 'who-ran-what help' for usage"
-                    exit 1
-                    ;;
-            esac
+        *)
+            handle_command "$@"
             ;;
     esac
 }

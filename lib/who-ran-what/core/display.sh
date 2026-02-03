@@ -43,82 +43,59 @@ format_period() {
     esac
 }
 
-# Display agent stats (real data)
+# Generic stats display function (reduces duplication)
+# Usage: show_stats_section "title" "data" "unit" [limit]
+show_stats_section() {
+    local title="$1"
+    local data="$2"
+    local unit="$3"
+    local limit="${4:-5}"
+    local empty_msg="${5:-No data found}"
+
+    header "$title"
+
+    if [[ -z "$data" ]]; then
+        echo -e "  ${DIM}${empty_msg}${RESET}"
+        return
+    fi
+
+    local max_count
+    max_count=$(echo "$data" | head -1 | awk '{print $1}')
+
+    echo "$data" | head -"$limit" | while read -r count name; do
+        if [[ -n "$name" ]]; then
+            printf "  ├── %-12s $(draw_bar "$count" "$max_count")  ${CYAN}%d ${unit}${RESET}\n" "$name" "$count"
+        fi
+    done
+}
+
+# Display agent stats
 show_agent_stats() {
     local period="${1:-week}"
     local display_period
     display_period=$(format_period "$period")
+    local data
+    data=$(count_agents "$period" 2>/dev/null)
 
-    header "📊 Top Agents ($display_period)"
-
-    # Get real agent data with period filter
-    local agent_data
-    agent_data=$(count_agents "$period" 2>/dev/null)
-
-    if [[ -z "$agent_data" ]]; then
-        echo -e "  ${DIM}No agent data found${RESET}"
-        echo -e "  ${DIM}Agents are created when you use the Task tool${RESET}"
-        return
-    fi
-
-    local max_count
-    max_count=$(echo "$agent_data" | head -1 | awk '{print $1}')
-
-    echo "$agent_data" | head -5 | while read -r count name; do
-        if [[ -n "$name" ]]; then
-            printf "  ├── %-12s $(draw_bar "$count" "$max_count")  ${CYAN}%d calls${RESET}\n" "$name" "$count"
-        fi
-    done
+    show_stats_section "📊 Top Agents ($display_period)" "$data" "calls" 5 "No agent data found - Agents are created when you use the Task tool"
 }
 
-# Display skill stats (real data)
+# Display skill stats
 show_skill_stats() {
     local period="${1:-week}"
+    local data
+    data=$(count_skills "$period" 2>/dev/null)
 
-    header "🔧 Top Skills"
-
-    # Get real skill data with period filter
-    local skill_data
-    skill_data=$(count_skills "$period" 2>/dev/null)
-
-    if [[ -z "$skill_data" ]]; then
-        echo -e "  ${DIM}No skill data found${RESET}"
-        return
-    fi
-
-    local max_count
-    max_count=$(echo "$skill_data" | head -1 | awk '{print $1}')
-
-    echo "$skill_data" | head -5 | while read -r count name; do
-        if [[ -n "$name" ]]; then
-            printf "  ├── %-12s $(draw_bar "$count" "$max_count")  ${CYAN}%d uses${RESET}\n" "$name" "$count"
-        fi
-    done
+    show_stats_section "🔧 Top Skills" "$data" "uses" 5
 }
 
-# Display tool stats (real data)
+# Display tool stats
 show_tool_stats() {
     local period="${1:-week}"
+    local data
+    data=$(count_tools "$period" 2>/dev/null)
 
-    header "🛠️  Top Tools"
-
-    # Get real tool data with period filter
-    local tool_data
-    tool_data=$(count_tools "$period" 2>/dev/null)
-
-    if [[ -z "$tool_data" ]]; then
-        echo -e "  ${DIM}No tool data found${RESET}"
-        return
-    fi
-
-    local max_count
-    max_count=$(echo "$tool_data" | head -1 | awk '{print $1}')
-
-    echo "$tool_data" | head -8 | while read -r count name; do
-        if [[ -n "$name" ]]; then
-            printf "  ├── %-12s $(draw_bar "$count" "$max_count")  ${CYAN}%d uses${RESET}\n" "$name" "$count"
-        fi
-    done
+    show_stats_section "🛠️  Top Tools" "$data" "uses" 8
 }
 
 # Display unused items
@@ -129,30 +106,23 @@ show_unused() {
 
     header "⚠️  Unused ($display_period)"
 
-    # Get unused agents
     local unused_agents
+    local unused_skills
     unused_agents=$(find_unused_agents "$period" 2>/dev/null)
+    unused_skills=$(find_unused_skills "$period" 2>/dev/null)
 
     if [[ -n "$unused_agents" ]]; then
         echo -e "  ${YELLOW}Unused Agents:${RESET}"
         echo "$unused_agents" | head -5 | while read -r agent; do
-            if [[ -n "$agent" ]]; then
-                echo -e "    └── ${DIM}$agent${RESET}"
-            fi
+            [[ -n "$agent" ]] && echo -e "    └── ${DIM}$agent${RESET}"
         done
     fi
 
-    # Get unused skills
-    local unused_skills
-    unused_skills=$(find_unused_skills "$period" 2>/dev/null)
-
     if [[ -n "$unused_skills" ]]; then
-        echo ""
+        [[ -n "$unused_agents" ]] && echo ""
         echo -e "  ${YELLOW}Unused Skills:${RESET}"
         echo "$unused_skills" | head -5 | while read -r skill; do
-            if [[ -n "$skill" ]]; then
-                echo -e "    └── ${DIM}$skill${RESET}"
-            fi
+            [[ -n "$skill" ]] && echo -e "    └── ${DIM}$skill${RESET}"
         done
     fi
 
@@ -204,26 +174,18 @@ show_trend_summary() {
     local period="${1:-week}"
 
     # Only show trends for week or month
-    if [[ "$period" != "week" ]] && [[ "$period" != "month" ]]; then
-        return
-    fi
+    [[ "$period" != "week" ]] && [[ "$period" != "month" ]] && return
 
     local trend_data
     trend_data=$(get_trend_data "$period")
 
-    local current
-    local previous
-    local change
+    local current previous change
     current=$(echo "$trend_data" | cut -d'|' -f1)
     previous=$(echo "$trend_data" | cut -d'|' -f2)
     change=$(echo "$trend_data" | cut -d'|' -f3)
 
     local prev_label
-    if [[ "$period" == "week" ]]; then
-        prev_label="vs last week"
-    else
-        prev_label="vs last month"
-    fi
+    [[ "$period" == "week" ]] && prev_label="vs last week" || prev_label="vs last month"
 
     header "📈 Trend"
     printf "  Tool calls: ${BOLD}%s${RESET} %s (%s: %s)\n" "$current" "$(show_trend_indicator "$change")" "$prev_label" "$previous"

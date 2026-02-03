@@ -2,6 +2,20 @@
 
 # Detection utilities for who-ran-what
 
+# Calculate date with offset (cross-platform)
+# Usage: calculate_date_offset 7 -> date 7 days ago
+calculate_date_offset() {
+    local days="$1"
+    local os_type
+    os_type=$(uname -s)
+
+    if [[ "$os_type" == "Darwin" ]]; then
+        date -v"-${days}d" +%Y-%m-%d
+    else
+        date -d "$days days ago" +%Y-%m-%d
+    fi
+}
+
 # Detect OS
 detect_os() {
     case "$(uname -s)" in

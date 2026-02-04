@@ -2,7 +2,8 @@
 
 # Error handling utilities for who-ran-what
 
-# Error codes
+# Error codes (exported for external use)
+# shellcheck disable=SC2034
 readonly ERR_NO_DATA=10
 readonly ERR_NO_CLAUDE_DIR=11
 readonly ERR_INVALID_COMMAND=12

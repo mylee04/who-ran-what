@@ -295,6 +295,40 @@ show_trend_indicator() {
     fi
 }
 
+# Get total calls across all tools
+get_all_tools_total() {
+    local period="${1:-week}"
+    local total=0
+
+    # Claude
+    local claude_calls
+    claude_calls=$(count_total_calls "$period" 2>/dev/null)
+    total=$((total + claude_calls))
+
+    # Gemini
+    if has_gemini_telemetry; then
+        local gemini_calls
+        gemini_calls=$(count_gemini_total_calls "$period" 2>/dev/null)
+        total=$((total + gemini_calls))
+    fi
+
+    # Codex
+    if has_codex_sessions; then
+        local codex_calls
+        codex_calls=$(count_codex_total_calls "$period" 2>/dev/null)
+        total=$((total + codex_calls))
+    fi
+
+    # OpenCode
+    if has_opencode_sessions; then
+        local opencode_calls
+        opencode_calls=$(count_opencode_total_calls "$period" 2>/dev/null)
+        total=$((total + opencode_calls))
+    fi
+
+    echo "$total"
+}
+
 # Display trend summary
 show_trend_summary() {
     local period="${1:-week}"
@@ -313,8 +347,65 @@ show_trend_summary() {
     local prev_label
     [[ "$period" == "week" ]] && prev_label="vs last week" || prev_label="vs last month"
 
-    header "📈 Trend"
-    printf "  Tool calls: ${BOLD}%s${RESET} %s (%s: %s)\n" "$current" "$(show_trend_indicator "$change")" "$prev_label" "$previous"
+    header "📈 Summary"
+
+    # Show Claude stats
+    printf "  Claude Code:  ${BOLD}%s${RESET} calls %s (%s: %s)\n" "$current" "$(show_trend_indicator "$change")" "$prev_label" "$previous"
+
+    # Show total across all tools if other tools have data
+    local total_current
+    total_current=$(get_all_tools_total "$period")
+
+    if [[ "$total_current" -gt "$current" ]]; then
+        printf "  ${DIM}All tools:     ${RESET}${BOLD}%s${RESET} ${DIM}total calls${RESET}\n" "$total_current"
+    fi
+}
+
+# Display compact stats for other tools (for dashboard)
+show_other_tools_summary() {
+    local period="${1:-week}"
+    local has_any=false
+
+    # Check if any other tools have data
+    if has_gemini_telemetry || has_codex_sessions || has_opencode_sessions; then
+        header "🔌 Other Tools"
+
+        # Gemini
+        if has_gemini_telemetry; then
+            local gemini_calls
+            gemini_calls=$(count_gemini_total_calls "$period" 2>/dev/null)
+            if [[ "$gemini_calls" -gt 0 ]]; then
+                printf "  ├── ${CYAN}Gemini CLI${RESET}     %s tool calls\n" "$gemini_calls"
+                has_any=true
+            fi
+        fi
+
+        # Codex
+        if has_codex_sessions; then
+            local codex_calls
+            codex_calls=$(count_codex_total_calls "$period" 2>/dev/null)
+            if [[ "$codex_calls" -gt 0 ]]; then
+                printf "  ├── ${CYAN}Codex CLI${RESET}      %s tool calls\n" "$codex_calls"
+                has_any=true
+            fi
+        fi
+
+        # OpenCode
+        if has_opencode_sessions; then
+            local opencode_calls
+            opencode_calls=$(count_opencode_total_calls "$period" 2>/dev/null)
+            if [[ "$opencode_calls" -gt 0 ]]; then
+                printf "  ├── ${CYAN}OpenCode${RESET}       %s tool calls\n" "$opencode_calls"
+                has_any=true
+            fi
+        fi
+
+        if [[ "$has_any" == "false" ]]; then
+            echo -e "  ${DIM}No activity in this period${RESET}"
+        fi
+
+        echo -e "  ${DIM}Use 'wr gemini/codex/opencode' for details${RESET}"
+    fi
 }
 
 # Main dashboard display
@@ -330,6 +421,8 @@ show_dashboard() {
     show_tool_stats "$period"
     echo ""
     show_project_breakdown "$period"
+    echo ""
+    show_other_tools_summary "$period"
     echo ""
     show_trend_summary "$period"
     echo ""

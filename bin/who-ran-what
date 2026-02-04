@@ -24,6 +24,7 @@ source "$LIB_DIR/utils/errors.sh"
 source "$LIB_DIR/utils/detect.sh"
 source "$LIB_DIR/utils/config.sh"
 source "$LIB_DIR/core/claude-parser.sh"
+source "$LIB_DIR/core/gemini-parser.sh"
 source "$LIB_DIR/core/display.sh"
 source "$LIB_DIR/core/json-output.sh"
 
@@ -31,7 +32,7 @@ source "$LIB_DIR/core/json-output.sh"
 COMMAND_NAME=$(basename "$0")
 
 # Parse global flags
-JSON_OUTPUT="false"
+export JSON_OUTPUT="false"
 declare -a REMAINING_ARGS
 
 parse_global_flags() {
@@ -76,6 +77,7 @@ COMMANDS:
     agents          Agent breakdown
     skills          Skill breakdown
     projects        Project breakdown
+    gemini          Gemini CLI tool usage
     clean           Show unused agents/skills
     config          Show current configuration
     help            Show this help message
@@ -108,7 +110,7 @@ handle_command() {
         "version"|"-v"|"--version")
             show_version
             ;;
-        "today"|"week"|"month"|"agents"|"skills"|"projects"|"clean"|"dashboard")
+        "today"|"week"|"month"|"agents"|"skills"|"projects"|"clean"|"dashboard"|"gemini")
             source "$LIB_DIR/commands/stats.sh"
             handle_stats_command "$@"
             ;;

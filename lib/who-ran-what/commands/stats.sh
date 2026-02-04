@@ -75,6 +75,16 @@ handle_stats_command() {
                 dim "Unused agents/skills are not used in the past 30 days"
             fi
             ;;
+        "gemini")
+            if [[ "$JSON_OUTPUT" == "true" ]]; then
+                generate_gemini_json "$CONFIG_DEFAULT_PERIOD"
+            else
+                show_dashboard_header "$CONFIG_DEFAULT_PERIOD"
+                echo ""
+                show_gemini_stats "$CONFIG_DEFAULT_PERIOD"
+                echo ""
+            fi
+            ;;
         *)
             error "Unknown stats command: $command"
             exit 1

@@ -72,3 +72,14 @@ has_codex_data() {
 has_gemini_data() {
     [[ -d "$GEMINI_DATA_DIR" ]]
 }
+
+# Check if Gemini CLI is installed
+detect_gemini() {
+    command -v gemini &> /dev/null
+}
+
+# Check if Gemini telemetry file exists and has data
+has_gemini_telemetry() {
+    local telemetry_file="$GEMINI_DATA_DIR/telemetry.log"
+    [[ -f "$telemetry_file" ]] && [[ -s "$telemetry_file" ]]
+}

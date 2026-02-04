@@ -156,6 +156,48 @@ show_project_breakdown() {
     done
 }
 
+# Display Gemini CLI stats
+show_gemini_stats() {
+    local period="${1:-week}"
+    local display_period
+    display_period=$(format_period "$period")
+
+    header "🔮 Gemini CLI ($display_period)"
+
+    if ! has_gemini_telemetry; then
+        echo -e "  ${DIM}Gemini telemetry not enabled${RESET}"
+        echo ""
+        echo -e "  ${DIM}To enable, add to ~/.gemini/settings.json:${RESET}"
+        echo -e "  ${DIM}{\"telemetry\": {\"enabled\": true, \"target\": \"local\"}}${RESET}"
+        return
+    fi
+
+    local data
+    data=$(count_gemini_tools "$period" 2>/dev/null)
+
+    if [[ -z "$data" ]]; then
+        echo -e "  ${DIM}No Gemini tool usage found for this period${RESET}"
+        return
+    fi
+
+    local max_count
+    max_count=$(echo "$data" | head -1 | awk '{print $1}')
+
+    echo "$data" | head -8 | while read -r count name; do
+        if [[ -n "$name" ]]; then
+            printf "  ├── %-12s $(draw_bar "$count" "$max_count")  ${CYAN}%d calls${RESET}\n" "$name" "$count"
+        fi
+    done
+
+    local session_count
+    local total_calls
+    session_count=$(list_gemini_sessions "$period" 2>/dev/null)
+    total_calls=$(count_gemini_total_calls "$period" 2>/dev/null)
+
+    echo ""
+    echo -e "  ${DIM}Sessions: $session_count | Total calls: $total_calls${RESET}"
+}
+
 # Display trend indicator
 show_trend_indicator() {
     local change="$1"

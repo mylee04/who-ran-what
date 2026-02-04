@@ -98,6 +98,7 @@ wrp             # Current project stats
 | `wr agents`   | All-time agent statistics                 |
 | `wr skills`   | All-time skill statistics                 |
 | `wr projects` | Project breakdown                         |
+| `wr gemini`   | Gemini CLI tool usage                     |
 | `wr clean`    | Show unused agents/skills (30+ days)      |
 | `wrp`         | Current project stats                     |
 
@@ -112,9 +113,25 @@ wrp             # Current project stats
 | Tool        | Data Location              | Status          |
 | ----------- | -------------------------- | --------------- |
 | Claude Code | `~/.claude/projects/`      | Fully supported |
+| Gemini CLI  | `~/.gemini/telemetry.log`  | Supported       |
 | OpenCode    | `~/.local/share/opencode/` | Coming soon     |
 | Codex CLI   | `~/.codex/sessions/`       | Coming soon     |
-| Gemini CLI  | `~/.gemini/`               | Coming soon     |
+
+### Gemini CLI Setup
+
+Gemini CLI requires telemetry to be enabled for tracking. Add to `~/.gemini/settings.json`:
+
+```json
+{
+  "telemetry": {
+    "enabled": true,
+    "target": "local",
+    "outfile": "~/.gemini/telemetry.log"
+  }
+}
+```
+
+Then use `wr gemini` to view Gemini CLI tool usage.
 
 ## Troubleshooting
 

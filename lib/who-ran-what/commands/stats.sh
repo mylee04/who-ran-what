@@ -85,6 +85,16 @@ handle_stats_command() {
                 echo ""
             fi
             ;;
+        "codex")
+            if [[ "$JSON_OUTPUT" == "true" ]]; then
+                generate_codex_json "$CONFIG_DEFAULT_PERIOD"
+            else
+                show_dashboard_header "$CONFIG_DEFAULT_PERIOD"
+                echo ""
+                show_codex_stats "$CONFIG_DEFAULT_PERIOD"
+                echo ""
+            fi
+            ;;
         *)
             error "Unknown stats command: $command"
             exit 1

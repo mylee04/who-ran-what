@@ -99,6 +99,7 @@ wrp             # Current project stats
 | `wr skills`   | All-time skill statistics                 |
 | `wr projects` | Project breakdown                         |
 | `wr gemini`   | Gemini CLI tool usage                     |
+| `wr codex`    | Codex CLI tool usage                      |
 | `wr clean`    | Show unused agents/skills (30+ days)      |
 | `wrp`         | Current project stats                     |
 
@@ -114,8 +115,8 @@ wrp             # Current project stats
 | ----------- | -------------------------- | --------------- |
 | Claude Code | `~/.claude/projects/`      | Fully supported |
 | Gemini CLI  | `~/.gemini/telemetry.log`  | Supported       |
+| Codex CLI   | `~/.codex/sessions/`       | Supported       |
 | OpenCode    | `~/.local/share/opencode/` | Coming soon     |
-| Codex CLI   | `~/.codex/sessions/`       | Coming soon     |
 
 ### Gemini CLI Setup
 

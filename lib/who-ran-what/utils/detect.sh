@@ -69,6 +69,16 @@ has_codex_data() {
     [[ -d "$CODEX_DATA_DIR" ]]
 }
 
+# Check if Codex CLI is installed
+detect_codex() {
+    command -v codex &> /dev/null
+}
+
+# Check if Codex session files exist
+has_codex_sessions() {
+    [[ -d "$CODEX_DATA_DIR" ]] && [[ -n "$(find "$CODEX_DATA_DIR" -name "*.jsonl" 2>/dev/null | head -1)" ]]
+}
+
 has_gemini_data() {
     [[ -d "$GEMINI_DATA_DIR" ]]
 }

@@ -25,6 +25,7 @@ source "$LIB_DIR/utils/detect.sh"
 source "$LIB_DIR/utils/config.sh"
 source "$LIB_DIR/core/claude-parser.sh"
 source "$LIB_DIR/core/gemini-parser.sh"
+source "$LIB_DIR/core/codex-parser.sh"
 source "$LIB_DIR/core/display.sh"
 source "$LIB_DIR/core/json-output.sh"
 
@@ -78,6 +79,7 @@ COMMANDS:
     skills          Skill breakdown
     projects        Project breakdown
     gemini          Gemini CLI tool usage
+    codex           Codex CLI tool usage
     clean           Show unused agents/skills
     config          Show current configuration
     help            Show this help message
@@ -110,7 +112,7 @@ handle_command() {
         "version"|"-v"|"--version")
             show_version
             ;;
-        "today"|"week"|"month"|"agents"|"skills"|"projects"|"clean"|"dashboard"|"gemini")
+        "today"|"week"|"month"|"agents"|"skills"|"projects"|"clean"|"dashboard"|"gemini"|"codex")
             source "$LIB_DIR/commands/stats.sh"
             handle_stats_command "$@"
             ;;

@@ -82,6 +82,7 @@ test_command "agents command exits 0" "$BIN agents"
 test_command "skills command exits 0" "$BIN skills"
 test_command "projects command exits 0" "$BIN projects"
 test_command "gemini command exits 0" "$BIN gemini"
+test_command "codex command exits 0" "$BIN codex"
 test_command "clean command exits 0" "$BIN clean"
 
 echo ""

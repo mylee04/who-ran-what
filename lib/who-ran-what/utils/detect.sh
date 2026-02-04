@@ -65,6 +65,17 @@ has_opencode_data() {
     [[ -d "$OPENCODE_DATA_DIR" ]]
 }
 
+# Check if OpenCode is installed
+detect_opencode() {
+    command -v opencode &> /dev/null
+}
+
+# Check if OpenCode session data exists
+has_opencode_sessions() {
+    local part_dir="$OPENCODE_DATA_DIR/../storage/part"
+    [[ -d "$part_dir" ]] && [[ -n "$(find "$part_dir" -name "*.json" 2>/dev/null | head -1)" ]]
+}
+
 has_codex_data() {
     [[ -d "$CODEX_DATA_DIR" ]]
 }

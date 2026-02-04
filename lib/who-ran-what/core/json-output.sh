@@ -324,3 +324,40 @@ EOF
 }
 EOF
 }
+
+# Generate OpenCode-only JSON
+generate_opencode_json() {
+    local period="${1:-week}"
+
+    if ! has_opencode_sessions; then
+        cat << EOF
+{
+  "period": "$period",
+  "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "has_data": false,
+  "tools": [],
+  "sessions": 0,
+  "total_calls": 0
+}
+EOF
+        return
+    fi
+
+    local tools
+    local session_count
+    local total_calls
+    tools=$(count_opencode_tools "$period" 2>/dev/null)
+    session_count=$(list_opencode_sessions "$period" 2>/dev/null)
+    total_calls=$(count_opencode_total_calls "$period" 2>/dev/null)
+
+    cat << EOF
+{
+  "period": "$period",
+  "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "has_data": true,
+  "tools": $(count_to_json_array "$tools" "name" "calls"),
+  "sessions": $session_count,
+  "total_calls": $total_calls
+}
+EOF
+}

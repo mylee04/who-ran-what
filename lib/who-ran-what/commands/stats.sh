@@ -95,6 +95,16 @@ handle_stats_command() {
                 echo ""
             fi
             ;;
+        "opencode")
+            if [[ "$JSON_OUTPUT" == "true" ]]; then
+                generate_opencode_json "$CONFIG_DEFAULT_PERIOD"
+            else
+                show_dashboard_header "$CONFIG_DEFAULT_PERIOD"
+                echo ""
+                show_opencode_stats "$CONFIG_DEFAULT_PERIOD"
+                echo ""
+            fi
+            ;;
         *)
             error "Unknown stats command: $command"
             exit 1

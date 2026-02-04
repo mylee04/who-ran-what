@@ -100,6 +100,7 @@ wrp             # Current project stats
 | `wr projects` | Project breakdown                         |
 | `wr gemini`   | Gemini CLI tool usage                     |
 | `wr codex`    | Codex CLI tool usage                      |
+| `wr opencode` | OpenCode tool usage                       |
 | `wr clean`    | Show unused agents/skills (30+ days)      |
 | `wrp`         | Current project stats                     |
 
@@ -111,12 +112,12 @@ wrp             # Current project stats
 
 ## Data Sources
 
-| Tool        | Data Location              | Status          |
-| ----------- | -------------------------- | --------------- |
-| Claude Code | `~/.claude/projects/`      | Fully supported |
-| Gemini CLI  | `~/.gemini/telemetry.log`  | Supported       |
-| Codex CLI   | `~/.codex/sessions/`       | Supported       |
-| OpenCode    | `~/.local/share/opencode/` | Coming soon     |
+| Tool        | Data Location                     | Status          |
+| ----------- | --------------------------------- | --------------- |
+| Claude Code | `~/.claude/projects/`             | Fully supported |
+| Gemini CLI  | `~/.gemini/telemetry.log`         | Supported       |
+| Codex CLI   | `~/.codex/sessions/`              | Supported       |
+| OpenCode    | `~/.local/share/opencode/storage/`| Supported       |
 
 ### Gemini CLI Setup
 

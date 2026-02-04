@@ -76,6 +76,7 @@ echo ""
 ## Usage
 
 Run this demo to see all features in action. Useful for:
+
 - Learning what the tool can do
 - Testing after changes
 - Showing the tool to others

@@ -1,6 +1,7 @@
 # Git Workflow Rules
 
 ## Branch Strategy
+
 - `main` - Production-ready code
 - Feature branches for development
 
@@ -14,16 +15,18 @@ type: brief description
 ```
 
 ### Types
-| Type | Description |
-|------|-------------|
-| feat | New feature |
-| fix | Bug fix |
-| docs | Documentation only |
-| refactor | Code refactoring |
-| test | Adding/updating tests |
-| chore | Maintenance tasks |
+
+| Type     | Description           |
+| -------- | --------------------- |
+| feat     | New feature           |
+| fix      | Bug fix               |
+| docs     | Documentation only    |
+| refactor | Code refactoring      |
+| test     | Adding/updating tests |
+| chore    | Maintenance tasks     |
 
 ### Examples
+
 ```
 feat: add Gemini CLI parser
 
@@ -40,6 +43,7 @@ fix: handle missing session files gracefully
 ```
 
 ## Pre-Commit Checklist
+
 - [ ] `make test` passes
 - [ ] No shellcheck warnings
 - [ ] No hardcoded credentials
@@ -47,6 +51,7 @@ fix: handle missing session files gracefully
 - [ ] No .env files staged
 
 ## Rules
+
 - Never force push to main
 - Never commit credentials
 - No Co-Authored-By lines
@@ -54,6 +59,7 @@ fix: handle missing session files gracefully
 - Keep commits focused and atomic
 
 ## Never Commit
+
 - `.env`
 - `*.pem`, `*.key`
 - `credentials.json`

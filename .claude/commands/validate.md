@@ -5,11 +5,13 @@ description: Validate shell script syntax and best practices
 # Validate Scripts
 
 ## What This Command Does
+
 1. Runs shellcheck on all shell scripts
 2. Reports any warnings or errors
 3. Suggests fixes for common issues
 
 ## When to Use
+
 - Before committing changes
 - After writing new shell code
 - When debugging script issues
@@ -17,6 +19,7 @@ description: Validate shell script syntax and best practices
 ## Process
 
 ### 1. Run shellcheck
+
 ```bash
 # Check main executable
 shellcheck bin/who-ran-what
@@ -31,6 +34,7 @@ shellcheck tests/*.sh
 ### 2. Common Issues
 
 #### Unquoted Variables
+
 ```bash
 # Bad
 echo $message
@@ -40,6 +44,7 @@ echo "$message"
 ```
 
 #### Missing Local
+
 ```bash
 # Bad
 my_func() {
@@ -53,6 +58,7 @@ my_func() {
 ```
 
 #### Command Check
+
 ```bash
 # Bad
 if which jq; then
@@ -62,5 +68,6 @@ if command -v jq &> /dev/null; then
 ```
 
 ## Success Criteria
+
 - shellcheck returns exit code 0
 - No warnings or errors

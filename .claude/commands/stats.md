@@ -20,6 +20,7 @@ Provides in-depth analysis of Claude Code usage patterns.
 ### 2. Agent Efficiency
 
 Compare agent usage patterns:
+
 - Which agents are used most?
 - Are any agents underutilized?
 - Usage trends over time
@@ -64,11 +65,13 @@ Compare agent usage patterns:
 ## Custom Analysis
 
 For deeper analysis, the raw session data is in:
+
 ```
 ~/.claude/projects/*/sessions/*.jsonl
 ```
 
 Use jq to extract specific patterns:
+
 ```bash
 # Count tool calls by type
 jq -r 'select(.message.content) | .message.content[] | select(.type=="tool_use") | .name' \

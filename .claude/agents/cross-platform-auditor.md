@@ -70,12 +70,12 @@ find . -type f -name "*.sh"
 
 ### 5. Command Availability
 
-| Command | macOS | Linux | Alternative |
-|---------|-------|-------|-------------|
-| `readlink -f` | No | Yes | Use custom function |
-| `realpath` | No (default) | Yes | `cd && pwd` |
-| `timeout` | No | Yes | Use background + kill |
-| `md5sum` | No | Yes | `md5 -q` on macOS |
+| Command       | macOS        | Linux | Alternative           |
+| ------------- | ------------ | ----- | --------------------- |
+| `readlink -f` | No           | Yes   | Use custom function   |
+| `realpath`    | No (default) | Yes   | `cd && pwd`           |
+| `timeout`     | No           | Yes   | Use background + kill |
+| `md5sum`      | No           | Yes   | `md5 -q` on macOS     |
 
 ## Audit Checklist
 
@@ -88,14 +88,14 @@ find . -type f -name "*.sh"
 
 ## Output Format
 
-```markdown
+````markdown
 # Cross-Platform Audit: [filename]
 
 ## Platform-Specific Code Found
 
-| Line | Issue | macOS | Linux | Fix |
-|------|-------|-------|-------|-----|
-| 42 | date -d | Fails | Works | Add OS check |
+| Line | Issue   | macOS | Linux | Fix          |
+| ---- | ------- | ----- | ----- | ------------ |
+| 42   | date -d | Fails | Works | Add OS check |
 
 ## Bash Version Concerns
 
@@ -111,4 +111,8 @@ find . -type f -name "*.sh"
 # Run these on both platforms:
 [test commands]
 ```
+````
+
+```
+
 ```

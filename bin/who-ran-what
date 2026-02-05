@@ -81,6 +81,7 @@ COMMANDS:
     agents          Agent breakdown
     skills          Skill breakdown
     projects        Project breakdown
+    claude          Claude Code tool usage
     gemini          Gemini CLI tool usage
     codex           Codex CLI tool usage
     opencode        OpenCode tool usage
@@ -118,7 +119,7 @@ handle_command() {
         "version"|"-v"|"--version")
             show_version
             ;;
-        "today"|"week"|"month"|"agents"|"skills"|"projects"|"clean"|"dashboard"|"gemini"|"codex"|"opencode")
+        "today"|"week"|"month"|"agents"|"skills"|"projects"|"clean"|"dashboard"|"claude"|"gemini"|"codex"|"opencode")
             source "$LIB_DIR/commands/stats.sh"
             handle_stats_command "$@"
             ;;

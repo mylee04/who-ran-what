@@ -156,6 +156,71 @@ show_project_breakdown() {
     done
 }
 
+# Display Claude Code stats (dedicated view)
+show_claude_stats() {
+    local period="${1:-week}"
+    local display_period
+    display_period=$(format_period "$period")
+
+    header "🤖 Claude Code ($display_period)"
+
+    # Agents
+    local agent_data
+    agent_data=$(count_agents "$period" 2>/dev/null)
+
+    if [[ -n "$agent_data" ]]; then
+        echo -e "  ${BOLD}Agents${RESET}"
+        local max_count
+        max_count=$(echo "$agent_data" | head -1 | awk '{print $1}')
+
+        echo "$agent_data" | head -5 | while read -r count name; do
+            if [[ -n "$name" ]]; then
+                printf "    ├── %-12s $(draw_bar "$count" "$max_count")  ${CYAN}%d calls${RESET}\n" "$name" "$count"
+            fi
+        done
+        echo ""
+    fi
+
+    # Tools
+    local tool_data
+    tool_data=$(count_tools "$period" 2>/dev/null)
+
+    if [[ -n "$tool_data" ]]; then
+        echo -e "  ${BOLD}Tools${RESET}"
+        local max_count
+        max_count=$(echo "$tool_data" | head -1 | awk '{print $1}')
+
+        echo "$tool_data" | head -5 | while read -r count name; do
+            if [[ -n "$name" ]]; then
+                printf "    ├── %-12s $(draw_bar "$count" "$max_count")  ${CYAN}%d uses${RESET}\n" "$name" "$count"
+            fi
+        done
+        echo ""
+    fi
+
+    # Skills
+    local skill_data
+    skill_data=$(count_skills "$period" 2>/dev/null)
+
+    if [[ -n "$skill_data" ]]; then
+        echo -e "  ${BOLD}Skills${RESET}"
+        local max_count
+        max_count=$(echo "$skill_data" | head -1 | awk '{print $1}')
+
+        echo "$skill_data" | head -5 | while read -r count name; do
+            if [[ -n "$name" ]]; then
+                printf "    ├── %-12s $(draw_bar "$count" "$max_count")  ${CYAN}%d uses${RESET}\n" "$name" "$count"
+            fi
+        done
+        echo ""
+    fi
+
+    # Summary
+    local total_calls
+    total_calls=$(count_total_calls "$period" 2>/dev/null)
+    echo -e "  ${DIM}Total tool calls: $total_calls${RESET}"
+}
+
 # Display Gemini CLI stats
 show_gemini_stats() {
     local period="${1:-week}"

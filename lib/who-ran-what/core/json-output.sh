@@ -251,6 +251,31 @@ generate_unused_json() {
 EOF
 }
 
+# Generate Claude-only JSON
+generate_claude_json() {
+    local period="${1:-week}"
+
+    local agents
+    local tools
+    local skills
+    local total_calls
+    agents=$(count_agents "$period" 2>/dev/null)
+    tools=$(count_tools "$period" 2>/dev/null)
+    skills=$(count_skills "$period" 2>/dev/null)
+    total_calls=$(count_total_calls "$period" 2>/dev/null)
+
+    cat << EOF
+{
+  "period": "$period",
+  "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "agents": $(count_to_json_array "$agents" "name" "calls"),
+  "tools": $(count_to_json_array "$tools" "name" "uses"),
+  "skills": $(count_to_json_array "$skills" "name" "uses"),
+  "total_calls": $total_calls
+}
+EOF
+}
+
 # Generate Gemini-only JSON
 generate_gemini_json() {
     local period="${1:-week}"

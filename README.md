@@ -119,6 +119,34 @@ wr clean        # Find unused items
 wrp             # Current project stats
 ```
 
+## How the Dashboard Works
+
+The default `wr` command shows a **Claude Code-focused dashboard** with a summary of other tools:
+
+```
+┌─────────────────────────────────────────────┐
+│  who-ran-what                    week       │
+│─────────────────────────────────────────────│
+│  📊 Top Agents      ← Claude Code agents    │
+│  🔧 Top Skills      ← Claude Code skills    │
+│  🛠️  Top Tools       ← Claude Code tools     │
+│  📁 Projects        ← Claude Code projects  │
+│  🔌 Other Tools     ← Gemini/Codex/OpenCode │
+│     └── Summary only (total calls)          │
+│  📈 Summary         ← Trends & totals       │
+│  💡 Tips            ← Workflow suggestions  │
+└─────────────────────────────────────────────┘
+```
+
+**For detailed stats on each tool, use dedicated commands:**
+
+| Command        | What it shows                          |
+| -------------- | -------------------------------------- |
+| `wr claude`    | Claude Code agents, tools, skills      |
+| `wr gemini`    | Gemini CLI tool usage breakdown        |
+| `wr codex`     | Codex CLI tool usage breakdown         |
+| `wr opencode`  | OpenCode tool usage breakdown          |
+
 ## Usage
 
 | Command       | Description                               |
@@ -130,6 +158,7 @@ wrp             # Current project stats
 | `wr agents`   | All-time agent statistics                 |
 | `wr skills`   | All-time skill statistics                 |
 | `wr projects` | Project breakdown                         |
+| `wr claude`   | Claude Code tool usage                    |
 | `wr gemini`   | Gemini CLI tool usage                     |
 | `wr codex`    | Codex CLI tool usage                      |
 | `wr opencode` | OpenCode tool usage                       |

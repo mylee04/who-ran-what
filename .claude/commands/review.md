@@ -1,72 +1,51 @@
 ---
-description: Code review for shell scripts
+description: Review changed shell scripts for quality and security
 ---
 
 # Code Review
 
-## What This Command Does
+Execute these steps NOW:
 
-1. Reviews changed files for issues
-2. Checks security, best practices, and style
-3. Provides actionable feedback
-
-## When to Use
-
-- Before merging a PR
-- After completing a feature
-- When unsure about code quality
-
-## Process
-
-### 1. Identify Changed Files
+## Step 1: Identify changed files
 
 ```bash
-git diff --name-only HEAD~1
-# or
-git diff --name-only main
+git diff --name-only HEAD~1 | grep -E '\.(sh|bash)$' || git diff --name-only HEAD~1
 ```
 
-### 2. Review Each File
+## Step 2: For each changed file, check:
 
-For each shell script, check:
+### Security (BLOCK if found)
+- [ ] No hardcoded credentials or API keys
+- [ ] No `eval` on user input
+- [ ] No command injection vulnerabilities
 
-#### Security
+### Shell Best Practices (NEEDS CHANGES if found)
+- [ ] All variables quoted: `"$var"`
+- [ ] Functions use `local` for variables
+- [ ] Uses `[[ ]]` not `[ ]`
+- [ ] Uses `command -v` not `which`
 
-- [ ] No hardcoded secrets
-- [ ] Input validation
-- [ ] Safe command execution
+### Code Quality
+- [ ] Functions are small and focused
+- [ ] Variable names are clear
+- [ ] No dead code
 
-#### Shell Best Practices
+## Step 3: Output format
 
-- [ ] Quoted variables
-- [ ] Local function variables
-- [ ] Error handling
+```markdown
+## Code Review: [filename]
 
-#### Code Quality
+### Security: ✅ PASS / ❌ ISSUES
+[list any issues]
 
-- [ ] Clear naming
-- [ ] Focused functions
-- [ ] Necessary comments only
+### Best Practices: ✅ PASS / ⚠️ WARNINGS
+[list any issues with line numbers]
 
-### 3. Provide Feedback
-
-Format:
-
-```
-## [filename]
-
-### Issues
-- Line X: [issue] → [fix]
-
-### Suggestions
-- [optional improvement]
-
-### Verdict
-[APPROVE / NEEDS CHANGES]
+### Verdict: APPROVE / NEEDS CHANGES / BLOCK
 ```
 
-## Severity Levels
+## Step 4: Run shellcheck
 
-- **BLOCK**: Security issue or critical bug
-- **NEEDS CHANGES**: Best practice violation
-- **APPROVE**: Code is ready to merge
+```bash
+shellcheck -x -e SC1091 [changed files]
+```

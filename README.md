@@ -4,7 +4,7 @@
 
 Analytics dashboard for AI coding tools - track agent invocations, skill usage, and optimize your workflow.
 
-[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/mylee04/who-ran-what/releases)
+[![Version](https://img.shields.io/badge/version-0.2.1-blue.svg)](https://github.com/mylee04/who-ran-what/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)]()
 
@@ -48,6 +48,38 @@ who-ran-what                    week
 - **Time views** - Daily, weekly, monthly breakdowns
 - **Project insights** - Usage patterns per project
 - **Cleanup suggestions** - Identify unused agents/skills
+- **Share your stats** - Generate beautiful images for social sharing
+- **Workflow tips** - Get suggestions to improve your AI coding workflow
+
+## Share Your Stats
+
+Generate a shareable image of your usage stats:
+
+```bash
+wr share
+```
+
+<p align="center">
+  <img src="assets/share-example.png" alt="Share Example" width="600">
+</p>
+
+## Workflow Tips
+
+Get personalized suggestions to improve your AI coding workflow:
+
+```bash
+wr tips
+```
+
+<p align="center">
+  <img src="assets/tips-example.png" alt="Tips Example" width="600">
+</p>
+
+The tips system analyzes your usage patterns and suggests ways to:
+- **Diversify agent usage** - Use specialized agents for better results
+- **Leverage skills** - Speed up common workflows with slash commands
+- **Balance exploration vs planning** - Use Plan for complex multi-step tasks
+- **Create custom agents** - Build project-specific agents for your codebase
 
 ## Installation
 
@@ -101,6 +133,8 @@ wrp             # Current project stats
 | `wr gemini`   | Gemini CLI tool usage                     |
 | `wr codex`    | Codex CLI tool usage                      |
 | `wr opencode` | OpenCode tool usage                       |
+| `wr share`    | Generate shareable stats image (SVG)      |
+| `wr tips`     | Get tips to improve your workflow         |
 | `wr clean`    | Show unused agents/skills (30+ days)      |
 | `wrp`         | Current project stats                     |
 

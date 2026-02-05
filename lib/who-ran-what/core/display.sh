@@ -426,4 +426,5 @@ show_dashboard() {
     echo ""
     show_trend_summary "$period"
     echo ""
+    show_tips "$period"
 }

@@ -1,73 +1,34 @@
 ---
-description: Validate shell script syntax and best practices
+description: Validate all shell scripts with shellcheck
 ---
 
 # Validate Scripts
 
-## What This Command Does
+Execute these steps NOW:
 
-1. Runs shellcheck on all shell scripts
-2. Reports any warnings or errors
-3. Suggests fixes for common issues
-
-## When to Use
-
-- Before committing changes
-- After writing new shell code
-- When debugging script issues
-
-## Process
-
-### 1. Run shellcheck
+## Step 1: Run shellcheck on all scripts
 
 ```bash
-# Check main executable
-shellcheck bin/who-ran-what
-
-# Check all library scripts
-shellcheck lib/who-ran-what/**/*.sh
-
-# Check test files
-shellcheck tests/*.sh
+shellcheck -x -e SC1091 bin/who-ran-what
+shellcheck -x -e SC1091 lib/who-ran-what/**/*.sh
+shellcheck -x -e SC1091 tests/*.sh
 ```
 
-### 2. Common Issues
-
-#### Unquoted Variables
+## Step 2: Run syntax check
 
 ```bash
-# Bad
-echo $message
-
-# Good
-echo "$message"
+bash -n bin/who-ran-what
 ```
 
-#### Missing Local
+## Step 3: Run tests
 
 ```bash
-# Bad
-my_func() {
-    result="value"
-}
-
-# Good
-my_func() {
-    local result="value"
-}
+./tests/run_all.sh
 ```
 
-#### Command Check
+## Step 4: Report results
 
-```bash
-# Bad
-if which jq; then
-
-# Good
-if command -v jq &> /dev/null; then
-```
-
-## Success Criteria
-
-- shellcheck returns exit code 0
-- No warnings or errors
+Tell the user:
+- ✅ How many files passed
+- ❌ Any errors found (with line numbers)
+- 💡 Suggested fixes for any issues

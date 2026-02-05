@@ -6,7 +6,7 @@
 set -e
 
 # Version
-VERSION="0.2.0"
+VERSION="0.2.1"
 
 # Determine the directory where the script is located (resolve symlinks)
 SCRIPT_PATH="${BASH_SOURCE[0]}"
@@ -29,6 +29,8 @@ source "$LIB_DIR/core/codex-parser.sh"
 source "$LIB_DIR/core/opencode-parser.sh"
 source "$LIB_DIR/core/display.sh"
 source "$LIB_DIR/core/json-output.sh"
+source "$LIB_DIR/core/share.sh"
+source "$LIB_DIR/core/tips.sh"
 
 # Detect how the script was called
 COMMAND_NAME=$(basename "$0")
@@ -82,6 +84,8 @@ COMMANDS:
     gemini          Gemini CLI tool usage
     codex           Codex CLI tool usage
     opencode        OpenCode tool usage
+    share           Generate shareable stats image
+    tips            Get tips to improve your workflow
     clean           Show unused agents/skills
     config          Show current configuration
     help            Show this help message
@@ -117,6 +121,14 @@ handle_command() {
         "today"|"week"|"month"|"agents"|"skills"|"projects"|"clean"|"dashboard"|"gemini"|"codex"|"opencode")
             source "$LIB_DIR/commands/stats.sh"
             handle_stats_command "$@"
+            ;;
+        "share")
+            shift
+            handle_share_command "$@"
+            ;;
+        "tips")
+            shift
+            handle_tips_command "$@"
             ;;
         "project")
             shift

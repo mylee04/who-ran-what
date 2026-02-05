@@ -97,7 +97,7 @@ test_command "project command exits 0" "$BIN project"
 echo ""
 echo "Testing: Output Content"
 echo "----------------------------------------"
-test_output_contains "version shows version number" "$BIN version" "0.2.1"
+test_output_contains "version shows version number" "$BIN version" "0.2.2"
 test_output_contains "help shows USAGE" "$BIN help" "USAGE"
 test_output_contains "help shows COMMANDS" "$BIN help" "COMMANDS"
 
